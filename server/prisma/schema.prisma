@@ -1,0 +1,18 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+// SQLite for local development; switch provider (and the driver adapter in
+// src/db.ts) to PostgreSQL when deploying. The URL lives in prisma.config.ts.
+datasource db {
+  provider = "sqlite"
+}
+
+// Fleshed out in milestone 2 (auth). Other models arrive with their milestones.
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}

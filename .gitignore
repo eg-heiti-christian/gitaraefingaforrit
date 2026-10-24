@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+**/generated/prisma/
+*.log
+
+# Env and local data
+.env
+*.db
+*.db-journal
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
