@@ -4,3 +4,4 @@ coverage
 **/generated/prisma
 package-lock.json
 server/prisma/migrations
+.claude/settings.local.json
