@@ -16,14 +16,14 @@ npm workspaces, TypeScript everywhere (Node 26, see `.nvmrc`):
 - `npm test` — server tests (Vitest + supertest)
 - `npm run typecheck` — all workspaces
 - `npm run lint` / `npm run format`
-- `npm run db:migrate` — create and apply a Prisma migration (`prisma migrate dev`)
+- `npm run db:migrate -- --name <name>` — create and apply a Prisma migration (`prisma migrate dev`); always pass `--name`, since it prompts for one otherwise
 
 The server needs `server/.env` (copy `server/.env.example`).
 
 ## Conventions
 
 - Request and response shapes go in `shared` and are imported by both sides — don't redeclare them in client or server.
-- Database changes: edit `server/prisma/schema.prisma`, then `npm run db:migrate`. Never hand-edit `src/generated/prisma/` or existing migrations.
+- Database changes: edit `server/prisma/schema.prisma`, then `npm run db:migrate -- --name <name>`. Never hand-edit `src/generated/prisma/` or existing migrations.
 - SQLite now, Postgres at deploy (milestone 7) — avoid SQLite-only features in queries.
 - New API routes get a Vitest test next to them.
 - Imports inside `server/` use `.js` extensions (ESM).
