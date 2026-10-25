@@ -1,6 +1,6 @@
 # Roadmap
 
-Guitar practice tracker: a single-user app (with login) for managing practice items, a weekly routine, and BPM progress over time.
+Guitar practice tracker: a multi-user app (open sign-up) for managing practice items, a weekly routine, and BPM progress over time. Each user sees only their own data.
 
 ## Stack
 
@@ -15,7 +15,7 @@ Guitar practice tracker: a single-user app (with login) for managing practice it
 Each milestone is built and reviewed before the next one starts.
 
 - [x] **1. Scaffold** — monorepo, tooling, client/server/shared packages
-- [ ] **2. Auth** — single-user login
+- [x] **2. Auth** — sign-up, login and logout
 - [ ] **3. Items CRUD** — create, edit, and delete practice items
 - [ ] **4. Weekly routine** — assign items to days of the week
 - [ ] **5. BPM updates + history chart** — log BPM changes and chart progress

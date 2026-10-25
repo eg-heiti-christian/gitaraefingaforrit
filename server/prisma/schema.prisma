@@ -9,10 +9,21 @@ datasource db {
   provider = "sqlite"
 }
 
-// Fleshed out in milestone 2 (auth). Other models arrive with their milestones.
 model User {
-  id           Int      @id @default(autoincrement())
-  username     String   @unique
+  id           Int       @id @default(autoincrement())
+  username     String    @unique
   passwordHash String
-  createdAt    DateTime @default(now())
+  createdAt    DateTime  @default(now())
+  sessions     Session[]
+}
+
+// The cookie holds a random token; only its SHA-256 hash is stored here.
+model Session {
+  id        String   @id
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
