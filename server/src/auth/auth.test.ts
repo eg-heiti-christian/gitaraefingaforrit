@@ -86,6 +86,13 @@ describe('sign-up', () => {
     expect(res.status).toBe(400);
     expect(await prisma.user.count()).toBe(0);
   });
+
+  it('rejects an email that is already registered', async () => {
+    await signUp(client()).expect(200);
+    const res = await signUp(client(), EMAIL.toUpperCase());
+    expect(res.status).toBe(422);
+    expect(await prisma.user.count()).toBe(1);
+  });
 });
 
 describe('update-user', () => {
@@ -97,13 +104,6 @@ describe('update-user', () => {
     expect(res.status).toBe(404);
     const user = await prisma.user.findUniqueOrThrow({ where: { email: EMAIL } });
     expect(user.name).toBe('Player');
-  });
-
-  it('rejects an email that is already registered', async () => {
-    await signUp(client()).expect(200);
-    const res = await signUp(client(), EMAIL.toUpperCase());
-    expect(res.status).toBe(422);
-    expect(await prisma.user.count()).toBe(1);
   });
 });
 
