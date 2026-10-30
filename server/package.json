@@ -8,13 +8,16 @@
     "test": "vitest run",
     "typecheck": "tsc -p .",
     "db:migrate": "prisma migrate dev",
+    "postdb:migrate": "prisma generate",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "user:create": "tsx --env-file=.env src/scripts/create-user.ts"
   },
   "dependencies": {
     "@practice/shared": "*",
     "@prisma/adapter-better-sqlite3": "^7.10.1",
     "@prisma/client": "^7.10.1",
+    "better-auth": "1.7.10",
     "express": "^5.1.0"
   },
   "devDependencies": {
