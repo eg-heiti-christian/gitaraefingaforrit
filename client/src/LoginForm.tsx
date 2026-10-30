@@ -1,28 +1,39 @@
 import { useState, type FormEvent } from 'react';
+import { loginRequestSchema } from '@practice/shared';
 import { useLogin } from './auth';
 import Field from './Field';
 
 export default function LoginForm({ onSignup }: { onSignup: () => void }) {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [validationError, setValidationError] = useState<string | null>(null);
   const loginMutation = useLogin();
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    loginMutation.mutate({ username, password });
+    // Same schema as SignupForm uses, so emails are normalized the same way.
+    const parsed = loginRequestSchema.safeParse({ email, password });
+    if (!parsed.success) {
+      setValidationError(parsed.error.issues[0]?.message ?? 'Invalid login details');
+      return;
+    }
+    setValidationError(null);
+    loginMutation.mutate(parsed.data);
   }
+
+  const error = validationError ?? (loginMutation.isError ? loginMutation.error.message : null);
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-4 rounded-xl bg-zinc-800 p-4">
       <h2 className="text-lg font-semibold">Log in</h2>
 
       <Field
-        label="Username"
-        autoComplete="username"
-        autoCapitalize="none"
+        label="Email"
+        type="email"
+        autoComplete="email"
         required
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
       />
       <Field
         label="Password"
@@ -33,9 +44,9 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
         onChange={(e) => setPassword(e.target.value)}
       />
 
-      {loginMutation.isError && (
+      {error && (
         <p role="alert" className="text-sm text-red-400">
-          {loginMutation.error.message}
+          {error}
         </p>
       )}
 

@@ -2,15 +2,15 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ApiError } from './api';
-import { meQueryKey } from './auth';
+import { clearSession, meQueryKey } from './auth';
 import App from './App';
 import './index.css';
 
-// A 401 from any request means the session ended: show the login form.
-// (Login failures are 401s too, but they leave the user logged out anyway.)
+// A 401 while logged in means the session ended: clear it, as logout does.
+// A 401 while logged out is just a failed login, so it's left alone.
 const onError = (error: Error) => {
-  if (error instanceof ApiError && error.status === 401) {
-    queryClient.setQueryData(meQueryKey, null);
+  if (error instanceof ApiError && error.status === 401 && queryClient.getQueryData(meQueryKey)) {
+    clearSession(queryClient);
   }
 };
 

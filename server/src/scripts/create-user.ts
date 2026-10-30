@@ -1,11 +1,11 @@
-// Creates a user, or sets a new password if the username exists. The web
-// sign-up page covers new accounts; this is mainly for password resets.
+// Creates a user, or sets a new password if the email is already registered.
+// The web sign-up page covers new accounts; this is mainly for password resets.
 // Run from the repo root: npm run user:create
 import { createInterface } from 'node:readline/promises';
 import { Writable } from 'node:stream';
 import { MIN_PASSWORD_LENGTH, signupRequestSchema } from '@practice/shared';
 import { prisma } from '../db.js';
-import { hashPassword } from '../auth/password.js';
+import { auth } from '../auth/auth.js';
 
 // readline echoes typed characters to `output`; muting it hides the password.
 let muted = false;
@@ -32,29 +32,40 @@ async function ask(question: string, { hidden = false } = {}) {
 }
 
 try {
-  const rawUsername = await ask('Username: ');
+  const rawEmail = await ask('Email: ');
+  const existing = await prisma.user.findUnique({
+    where: { email: rawEmail.trim().toLowerCase() },
+  });
+  const rawName = existing ? existing.name : await ask('Name: ');
   const password = await ask(`Password (at least ${MIN_PASSWORD_LENGTH} characters): `, {
     hidden: true,
   });
   const confirm = await ask('Repeat password: ', { hidden: true });
 
-  const parsed = signupRequestSchema.safeParse({ username: rawUsername, password });
+  const parsed = signupRequestSchema.safeParse({ name: rawName, email: rawEmail, password });
   if (!parsed.success) throw new Error(parsed.error.issues[0]?.message);
   if (password !== confirm) throw new Error('Passwords do not match.');
-  const { username } = parsed.data;
+  const { name, email } = parsed.data;
 
-  const passwordHash = await hashPassword(password);
-  const existing = await prisma.user.findUnique({ where: { username } });
   if (existing) {
-    // A password change logs out every existing session.
+    // Hashed the way Better Auth hashes it. The new password and the logout of
+    // every existing session are written together, so neither happens alone.
+    const credential = await prisma.account.findFirst({
+      where: { userId: existing.id, providerId: 'credential' },
+    });
+    if (!credential) throw new Error(`${email} has no password sign-in to reset.`);
+
+    const passwordHash = await (await auth.$context).password.hash(password);
     await prisma.$transaction([
-      prisma.user.update({ where: { id: existing.id }, data: { passwordHash } }),
+      prisma.account.update({ where: { id: credential.id }, data: { password: passwordHash } }),
       prisma.session.deleteMany({ where: { userId: existing.id } }),
     ]);
-    console.log(`Password updated for "${username}"; existing sessions were logged out.`);
+    console.log(`Password updated for ${email}; existing sessions were logged out.`);
   } else {
-    await prisma.user.create({ data: { username, passwordHash } });
-    console.log(`Created user "${username}".`);
+    // Sign-up also logs the new user in; no browser holds that session, so drop it.
+    const { token } = await auth.api.signUpEmail({ body: { name, email, password } });
+    if (token) await prisma.session.delete({ where: { token } });
+    console.log(`Created user ${email}.`);
   }
 } catch (err) {
   console.error(err instanceof Error ? err.message : err);

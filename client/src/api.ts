@@ -1,3 +1,4 @@
+import { createAuthClient } from 'better-auth/client';
 import type {
   ErrorResponse,
   HealthResponse,
@@ -24,27 +25,42 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (res.status === 204 ? undefined : await res.json()) as T;
 }
 
-const postJson = <T>(path: string, body?: unknown) =>
-  request<T>(path, {
-    method: 'POST',
-    headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-
 export const fetchHealth = () => request<HealthResponse>('/api/health');
+
+// Better Auth's endpoints under /api/auth, on the same origin (Vite proxies /api in dev).
+const authClient = createAuthClient();
+
+type AuthError = { status: number; statusText: string; message?: string };
+
+/** Unwraps a Better Auth client result, throwing ApiError like `request` does. */
+async function authCall<T>(call: Promise<{ data: T | null; error: AuthError | null }>) {
+  const { data, error } = await call;
+  if (error)
+    throw new ApiError(error.status, error.message ?? `${error.status} ${error.statusText}`);
+  return data;
+}
+
+const toUser = ({ id, email, name }: UserResponse): UserResponse => ({ id, email, name });
+
+/** For sign-in and sign-up, which answer with the user on success. */
+async function authUser(
+  call: Promise<{ data: { user: UserResponse } | null; error: AuthError | null }>,
+) {
+  const data = await authCall(call);
+  if (!data) throw new ApiError(500, 'The server sent no user');
+  return toUser(data.user);
+}
 
 /** The logged-in user, or null when there is no valid session. */
 export async function fetchMe(): Promise<UserResponse | null> {
-  try {
-    return await request<UserResponse>('/api/auth/me');
-  } catch (err) {
-    if (err instanceof ApiError && err.status === 401) return null;
-    throw err;
-  }
+  const session = await authCall(authClient.getSession());
+  return session ? toUser(session.user) : null;
 }
 
-export const login = (body: LoginRequest) => postJson<UserResponse>('/api/auth/login', body);
+export const login = (body: LoginRequest) => authUser(authClient.signIn.email(body));
 
-export const signup = (body: SignupRequest) => postJson<UserResponse>('/api/auth/signup', body);
+export const signup = (body: SignupRequest) => authUser(authClient.signUp.email(body));
 
-export const logout = () => postJson<void>('/api/auth/logout');
+export const logout = async () => {
+  await authCall(authClient.signOut());
+};

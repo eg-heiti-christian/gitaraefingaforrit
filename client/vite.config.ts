@@ -8,7 +8,8 @@ export default defineConfig({
     // host: true exposes the dev server on your LAN so you can test on your phone.
     host: true,
     proxy: {
-      '/api': 'http://localhost:3001',
+      // xfwd passes the client's address on, so the API rate-limits per device.
+      '/api': { target: 'http://localhost:3001', xfwd: true },
     },
   },
 });

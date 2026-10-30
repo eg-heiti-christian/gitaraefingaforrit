@@ -8,35 +8,36 @@ export interface HealthResponse {
   timestamp: string;
 }
 
-// Auth
+// Auth. The /api/auth/* endpoints belong to Better Auth; these schemas mirror
+// its email + password limits so the forms can check input before sending.
 
-// Usernames are case-insensitive: both schemas store and look them up in lowercase.
+export const MIN_PASSWORD_LENGTH = 12;
+export const MAX_PASSWORD_LENGTH = 200;
+
+// Trimmed and lowercased before validating, as Better Auth stores emails lowercased.
+const emailSchema = z.string().trim().toLowerCase().pipe(z.email('Enter a valid email address'));
+
 export const loginRequestSchema = z.object({
-  username: z.string().trim().toLowerCase().min(1).max(100),
-  password: z.string().min(1).max(200),
+  email: emailSchema,
+  password: z.string().min(1).max(MAX_PASSWORD_LENGTH),
 });
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 
-export const MIN_PASSWORD_LENGTH = 12;
-
 export const signupRequestSchema = z.object({
-  username: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .min(3, 'Username must be at least 3 characters')
-    .max(32, 'Username must be at most 32 characters')
-    .regex(/^[a-z0-9_.-]+$/, 'Username may only use letters, digits, _ . and -'),
+  name: z.string().trim().min(1, 'Enter your name').max(100, 'Name must be at most 100 characters'),
+  email: emailSchema,
   password: z
     .string()
     .min(MIN_PASSWORD_LENGTH, `Password must be at least ${MIN_PASSWORD_LENGTH} characters`)
-    .max(200, 'Password must be at most 200 characters'),
+    .max(MAX_PASSWORD_LENGTH, `Password must be at most ${MAX_PASSWORD_LENGTH} characters`),
 });
 export type SignupRequest = z.infer<typeof signupRequestSchema>;
 
+/** The logged-in user, as the app sees it. */
 export interface UserResponse {
-  id: number;
-  username: string;
+  id: string;
+  email: string;
+  name: string;
 }
 
 export interface ErrorResponse {

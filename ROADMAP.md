@@ -7,6 +7,7 @@ Guitar practice tracker: a multi-user app (open sign-up) for managing practice i
 - **Language:** TypeScript throughout, npm workspaces (`client`, `server`, `shared`)
 - **Client:** React, Vite, Tailwind, TanStack Query
 - **Server:** Express, zod
+- **Auth:** Better Auth (email + password), running inside the Express server with its tables in our database
 - **Database:** Prisma — SQLite for development, Postgres in production
 - **BPM model:** each item tracks a current and target BPM, with a `BpmLog` history
 

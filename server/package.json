@@ -17,11 +17,10 @@
     "@practice/shared": "*",
     "@prisma/adapter-better-sqlite3": "^7.10.1",
     "@prisma/client": "^7.10.1",
-    "cookie-parser": "^1.4.7",
+    "better-auth": "1.7.10",
     "express": "^5.1.0"
   },
   "devDependencies": {
-    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.3",
     "@types/node": "^26.6.5",
     "@types/supertest": "^6.0.3",

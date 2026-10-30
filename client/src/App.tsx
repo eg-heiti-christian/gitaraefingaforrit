@@ -20,7 +20,9 @@ export default function App() {
           </div>
           {me.data && (
             <div className="text-right text-sm">
-              <p className="text-zinc-400">{me.data.username}</p>
+              <p className="text-zinc-400" title={me.data.email}>
+                {me.data.name}
+              </p>
               <button
                 onClick={() => logout.mutate()}
                 disabled={logout.isPending}

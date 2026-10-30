@@ -4,7 +4,8 @@ import { useSignup } from './auth';
 import Field from './Field';
 
 export default function SignupForm({ onLogin }: { onLogin: () => void }) {
-  const [username, setUsername] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -13,7 +14,7 @@ export default function SignupForm({ onLogin }: { onLogin: () => void }) {
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
     // Check with the same schema as the server, to show problems without a round trip.
-    const parsed = signupRequestSchema.safeParse({ username, password });
+    const parsed = signupRequestSchema.safeParse({ name, email, password });
     if (!parsed.success) {
       setValidationError(parsed.error.issues[0]?.message ?? 'Invalid sign-up details');
       return;
@@ -33,13 +34,19 @@ export default function SignupForm({ onLogin }: { onLogin: () => void }) {
       <h2 className="text-lg font-semibold">Create an account</h2>
 
       <Field
-        label="Username"
-        hint="3–32 characters: letters, digits, _ . -"
-        autoComplete="username"
-        autoCapitalize="none"
+        label="Name"
+        autoComplete="name"
         required
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <Field
+        label="Email"
+        type="email"
+        autoComplete="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
       />
       <Field
         label="Password"

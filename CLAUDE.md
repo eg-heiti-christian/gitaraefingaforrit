@@ -19,7 +19,7 @@ npm workspaces, TypeScript everywhere (Node 26, see `.nvmrc`):
 - `npm run db:migrate -- --name <name>` — create and apply a Prisma migration (`prisma migrate dev`), then regenerate the client; always pass `--name`, since it prompts for one otherwise
 - `npm run user:create` — create a user or reset a user's password (interactive)
 
-The server needs `server/.env` (copy `server/.env.example`).
+The server needs `server/.env` (copy `server/.env.example`, and set `BETTER_AUTH_SECRET`).
 
 ## Conventions
 
@@ -27,8 +27,9 @@ The server needs `server/.env` (copy `server/.env.example`).
 - Database changes: edit `server/prisma/schema.prisma`, then `npm run db:migrate -- --name <name>`. Never hand-edit `src/generated/prisma/` or existing migrations.
 - SQLite now, Postgres at deploy (milestone 7) — avoid SQLite-only features in queries.
 - New API routes get a Vitest test next to them. Tests run against `server/prisma/test.db`, rebuilt from the migrations on each run.
+- Auth is Better Auth (`server/src/auth/auth.ts`), email + password. It owns `/api/auth/*` and the User, Session, Account and Verification tables — don't add hand-written auth routes or edit those models beyond what Better Auth's config declares. The client talks to it through the helpers in `client/src/api.ts`.
 - Every `/api/*` route registered after `requireAuth` in `app.ts` needs a session; only `/api/health` and `/api/auth/*` are public.
-- Data is per user: new models get a `userId` relation, and every query filters by `res.locals.user.id`. A request for another user's record returns 404.
+- Data is per user: new models get a `userId String` relation, and every query filters by `res.locals.user.id`. A request for another user's record returns 404.
 - Imports inside `server/` use `.js` extensions (ESM).
 
 ## Workflow
