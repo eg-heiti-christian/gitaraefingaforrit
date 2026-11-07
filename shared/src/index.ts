@@ -40,6 +40,40 @@ export interface UserResponse {
   name: string;
 }
 
+// Practice items.
+
+export const MAX_ITEM_NAME_LENGTH = 100;
+export const MAX_ITEM_DESCRIPTION_LENGTH = 280;
+
+// Postgres text can't hold NUL characters, so they're refused up front.
+const NO_NUL = /^[^\0]*$/;
+
+// Used for both create and update. Both keys are required, so an update that
+// leaves out the description can't silently erase it; send '' for none.
+export const itemRequestSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Enter a name')
+    .max(MAX_ITEM_NAME_LENGTH, `Name must be at most ${MAX_ITEM_NAME_LENGTH} characters`)
+    .regex(NO_NUL, 'Name contains an invalid character'),
+  description: z
+    .string()
+    .trim()
+    .max(
+      MAX_ITEM_DESCRIPTION_LENGTH,
+      `Description must be at most ${MAX_ITEM_DESCRIPTION_LENGTH} characters`,
+    )
+    .regex(NO_NUL, 'Description contains an invalid character'),
+});
+export type ItemRequest = z.infer<typeof itemRequestSchema>;
+
+export interface ItemResponse {
+  id: string;
+  name: string;
+  description: string;
+}
+
 export interface ErrorResponse {
   error: string;
 }

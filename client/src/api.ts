@@ -2,6 +2,8 @@ import { createAuthClient } from 'better-auth/client';
 import type {
   ErrorResponse,
   HealthResponse,
+  ItemRequest,
+  ItemResponse,
   LoginRequest,
   SignupRequest,
   UserResponse,
@@ -25,7 +27,24 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (res.status === 204 ? undefined : await res.json()) as T;
 }
 
+const jsonBody = (method: string, body: unknown): RequestInit => ({
+  method,
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(body),
+});
+
 export const fetchHealth = () => request<HealthResponse>('/api/health');
+
+export const fetchItems = () => request<ItemResponse[]>('/api/items');
+
+export const createItem = (body: ItemRequest) =>
+  request<ItemResponse>('/api/items', jsonBody('POST', body));
+
+export const updateItem = (id: string, body: ItemRequest) =>
+  request<ItemResponse>(`/api/items/${encodeURIComponent(id)}`, jsonBody('PUT', body));
+
+export const deleteItem = (id: string) =>
+  request<void>(`/api/items/${encodeURIComponent(id)}`, { method: 'DELETE' });
 
 // Better Auth's endpoints under /api/auth, on the same origin (Vite proxies /api in dev).
 const authClient = createAuthClient();

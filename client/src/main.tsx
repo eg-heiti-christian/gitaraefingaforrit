@@ -19,6 +19,9 @@ const queryClient = new QueryClient({
   mutationCache: new MutationCache({ onError }),
   defaultOptions: {
     queries: {
+      // useMe rechecks the session on these events and then refetches the rest.
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
       retry: (failureCount, error) =>
         !(error instanceof ApiError && error.status < 500) && failureCount < 3,
     },
