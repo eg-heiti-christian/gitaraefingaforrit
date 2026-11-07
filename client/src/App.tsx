@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchHealth } from './api';
 import { useLogout, useMe } from './auth';
+import ItemList from './ItemList';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 
@@ -42,7 +43,12 @@ export default function App() {
           ) : (
             <SignupForm onLogin={() => setAuthView('login')} />
           ))}
-        {me.data && <SystemStatus />}
+        {me.data && (
+          <>
+            <ItemList userId={me.data.id} />
+            <SystemStatus />
+          </>
+        )}
       </div>
     </main>
   );

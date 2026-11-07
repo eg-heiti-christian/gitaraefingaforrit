@@ -17,7 +17,7 @@ Each milestone is built and reviewed before the next one starts.
 
 - [x] **1. Scaffold** — monorepo, tooling, client/server/shared packages
 - [x] **2. Auth** — sign-up, login and logout
-- [ ] **3. Items CRUD** — create, edit, and delete practice items
+- [x] **3. Items CRUD** — create, edit, and delete practice items
 - [ ] **4. Weekly routine** — assign items to days of the week
 - [ ] **5. BPM updates + history chart** — log BPM changes and chart progress
 - [ ] **6. Polish / PWA** — UX polish, installable PWA
